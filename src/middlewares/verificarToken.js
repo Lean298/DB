@@ -8,7 +8,9 @@ const verificarToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const usuarioActual = await Usuario.findById(decoded.id);
-    if (usuarioActual.eliminado) return res.status(401).json({ error: 'Usuario no existe' });
+    if (!usuarioActual || usuarioActual.eliminado) {
+      return res.status(401).json({ error: 'Usuario no existe' });
+    }
 
     req.usuario = usuarioActual;
     next();

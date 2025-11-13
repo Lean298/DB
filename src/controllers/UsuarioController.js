@@ -14,7 +14,7 @@ export const listarUsuarios = async (req, res, next) => {
   try {
     const { estado } = req.query;
 
-    let filtro = { rol: "cliente" }; 
+    const filtro = { rol: { $ne: "administrador" } };
 
     if (estado === "activos") filtro.eliminado = false;
     else if (estado === "eliminados") filtro.eliminado = true;
@@ -45,18 +45,22 @@ export const registrarUsuario = async (req, res, next) => {
       password: passwordHasheado
     });
 
-    res.status(201).json({ success: true, data: nuevoUsuario });
+    const { password: _, ...usuarioSinPassword } = nuevoUsuario.toObject();
+
+    res.status(201).json({ success: true, data: usuarioSinPassword });
   } catch (e) {
     next(e);
   }
 };
 
-export const registrarAdministrador = async (req, res) => {
+export const registrarAdministrador = async (req, res, next) => {
   try {
     const { nombre, email, password, direccion, telefono } = req.body;
 
     const existe = await Usuario.findOne({ email });
-    if (existe) return res.status(400).json({ mensaje: "El email ya está registrado" });
+    if (existe) {
+      return res.status(400).json({ success: false, error: "El email ya está registrado" });
+    }
 
     const passwordHasheado = await hashearPassword(password);
     const nuevoAdmin = await Usuario.create({
@@ -68,9 +72,11 @@ export const registrarAdministrador = async (req, res) => {
       rol: "administrador"
     });
 
-    res.status(201).json({ mensaje: "Administrador creado correctamente" });
+    const { password: _, ...adminSinPassword } = nuevoAdmin.toObject();
+
+    res.status(201).json({ success: true, data: adminSinPassword });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al crear administrador", error });
+    next(error);
   }
 };
 
