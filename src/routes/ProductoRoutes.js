@@ -9,6 +9,8 @@ import {
   eliminarProducto,
   actualizarStock
 } from "../controllers/ProductoController.js";
+import verificarToken from "../middlewares/verificarToken.js";
+import protegerRutas from "../middlewares/protegerRutas.js";
 
 const router = express.Router();
 
@@ -20,15 +22,9 @@ router.get("/top", productosTop);
 
 router.get("/:id", obtenerProducto);
 
-router.post("/", crearProducto);
-
-
-router.put("/:id", actualizarProducto);
-
-
-router.delete("/:id", eliminarProducto);
-
-
-router.patch("/:id/stock", actualizarStock);
+router.post("/", verificarToken, protegerRutas("administrador"), crearProducto);
+router.put("/:id", verificarToken, protegerRutas("administrador"), actualizarProducto);
+router.delete("/:id", verificarToken, protegerRutas("administrador"), eliminarProducto);
+router.patch("/:id/stock", verificarToken, protegerRutas("administrador"), actualizarStock);
 
 export default router;

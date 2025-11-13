@@ -40,7 +40,12 @@ export const filtrarProductos = async (req, res, next) => {
     }
 
     if (marca) {
-      condiciones.push({ descripcion: { $regex: marca, $options: "i" } }); // ejemplo: marca en descripción
+      condiciones.push({
+        $or: [
+          { nombre: { $regex: marca, $options: "i" } },
+          { descripcion: { $regex: marca, $options: "i" } }
+        ]
+      });
     }
 
     const productos = await Producto.find({ $and: condiciones }).populate("categoria");
