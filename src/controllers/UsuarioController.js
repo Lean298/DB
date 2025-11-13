@@ -14,7 +14,7 @@ export const listarUsuarios = async (req, res, next) => {
   try {
     const { estado } = req.query;
 
-    let filtro = { rol: "cliente" }; 
+    const filtro = { rol: { $ne: "administrador" } };
 
     if (estado === "activos") filtro.eliminado = false;
     else if (estado === "eliminados") filtro.eliminado = true;
